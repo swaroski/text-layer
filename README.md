@@ -1,4 +1,4 @@
-# TextLayer Core
+# TextLayer Technical Interview
 
 <div align="center">
 
@@ -8,36 +8,91 @@
 
 </div>
 
-A Flask application template for building AI applications with TextLayer. This template provides core resources and structure for creating robust AI-powered services.
+This repository contains a simplified version of the TextLayer Core template, specifically designed for technical interview purposes. It provides a foundation for demonstrating your skills in building AI applications with Flask and related technologies.
 
-## 📋 Table of Contents
+## 📋 Quick Start
 
-- [Overview](#overview)
-- [Features](#features)
-- [Architecture](#architecture)
-  - [Application Flow](#application-flow)
-  - [Langfuse Integration](#langfuse-integration)
-  - [LiteLLM Integration](#litellm-integration)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Deployment](#deployment)
-- [Project Structure](#project-structure)
-- [Contributing](#contributing)
+### Using Make (Recommended)
+
+The project includes a Makefile with helpful commands for setup and running:
+
+```bash
+# Initialize the project (creates venv, installs dependencies, sets up .env)
+make init
+
+# Start the Flask server
+make start
+
+# For help with available commands
+make help
+```
+
+### Manual Setup
+
+1. Clone the repository
+2. Set up environment variables:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your API keys and configuration
+   ```
+3. Create and activate a virtual environment:
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   ```
+4. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+5. Run the application:
+   ```bash
+   FLASK_APP=application.py python -m flask run
+   ```
+6. Access the application at http://127.0.0.1:5000
+
+### Using Docker
+
+You can also run the application in a Docker container:
+
+```bash
+# Build the Docker image
+docker build -t textlayer-interview .
+
+# Run the container
+docker run -p 5000:5000 textlayer-interview
+```
+
+## ⚙️ Configuration
+
+The application is configured through environment variables in the `.env` file. Key configuration variables include:
+
+```
+# Flask Configuration
+FLASK_CONFIG=DEV
+
+# OpenAI Configuration
+OPENAI_API_KEY=sk-your-api-key-here
+CHAT_MODEL=gpt-4o-mini
+EMBEDDING_MODEL=text-embedding-3-small
+KNN_EMBEDDING_DIMENSION=1536
+
+# Langfuse Configuration (for observability)
+LANGFUSE_PUBLIC_KEY=pk-your-public-key-here
+LANGFUSE_SECRET_KEY=sk-your-secret-key-here
+LANGFUSE_HOST=https://cloud.langfuse.com
+```
+
+Make sure to update these values with your actual API keys before running the application.
 
 ## 🔍 Overview
 
-TextLayer Core is a template for building AI applications. It provides a structured foundation with built-in integrations for AI services, search capabilities, and observability. The template is designed to be extended with additional integrations based on specific project requirements.
+TextLayer Core is a template for building AI applications. This interview version includes the core structure and essential integrations to demonstrate your ability to work with AI services, Flask, and modern Python application architecture.
 
 ## ✨ Features
 
 - Flask application structure with modular organization
 - Integration with LiteLLM for unified access to multiple LLM providers
-- Search capabilities with Elasticsearch/OpenSearch
-- AWS integration for cloud deployment
 - Langfuse integration for prompt management and observability
-- Containerized deployment via Docker
 - Environment-based configuration management
 
 ## 🏛️ Architecture
@@ -68,15 +123,11 @@ The TextLayer Core template implements a clean, modular architecture for AI appl
 
 1. **Prompt Management**:
    - Centralized storage and versioning of prompts
-   - A/B testing of different prompt variants
    - Prompt templates with variable substitution
-   - Prompt performance analytics
 
 2. **Observability with Trace Logging**:
    - Process flows create Langfuse traces
    - Key processing steps are tagged with observe markers
-   - Spans capture duration and metadata for performance analysis
-   - Scores and feedback can be logged for quality assessment
 
 Example trace tags implementation:
 
@@ -97,15 +148,6 @@ def add_numbers(a: int, b: int) -> int:
     return a + b
 ```
 
-The trace logging enables detailed analytics on:
-- End-to-end processing time
-- LLM response latency
-- Error rates and types
-- Prompt effectiveness
-- User feedback correlation
-
-For more information on Langfuse integration, see the [Langfuse Documentation](https://langfuse.com/docs/sdk/python).
-
 ### LiteLLM Integration
 
 The application uses [LiteLLM](https://docs.litellm.ai/) in the `services/llm` module to provide a unified interface for multiple LLM providers:
@@ -114,12 +156,6 @@ The application uses [LiteLLM](https://docs.litellm.ai/) in the `services/llm` m
    - Single interface to access multiple LLM providers (OpenAI, Anthropic, etc.)
    - Simplified model switching and fallback mechanisms
    - Standardized input/output formats
-
-2. **Features Utilized**:
-   - Model routing
-   - Cost tracking and budget management
-   - Caching and rate limiting
-   - Automatic retries and error handling
 
 Example LiteLLM usage:
 
@@ -134,183 +170,38 @@ response = completion(
 )
 ```
 
-LiteLLM allows the application to easily switch between different LLM providers without changing the codebase, enabling model experimentation and fallback strategies.
+## 🚀 Interview Tasks
 
-For more information on LiteLLM integration, see the [LiteLLM Documentation](https://docs.litellm.ai/).
+As part of the interview process, you may be asked to:
 
-## 📋 Prerequisites
-
-- Python 3.9
-- [Docker](https://docs.docker.com/engine/install/) (for building and testing the container)
-- [Doppler](https://dashboard.doppler.com/register) account & [Doppler CLI](https://docs.doppler.com/docs/install-cli) (recommended for secrets management)
-- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) (if deploying to AWS)
-- Access to LLM providers (OpenAI, Anthropic, etc.)
-- Langfuse account for prompt management and observability
-
-## 🚀 Installation
-
-### Local Development
-
-1. Clone the repository
-
-```bash
-git clone https://github.com/TextLayer/textlayer-core.git
-cd textlayer-core
-```
-
-2. Create and activate a virtual environment
-
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-4. Set up environment variables
-
-```bash
-cp .env.example .env  # Create from example if available
-# Edit .env with your configuration
-```
-
-### Using `uv` for Dependency Management
-
-This project supports the use of the `uv` Python package manager for managing dependencies:
-
-- Install `uv` globally using `pipx`:
-
-   ```bash
-   python -m pip install --upgrade pip
-   python -m pip install pipx
-   pipx install uv
-   ```
-
-- Install dependencies using `uv`:
-
-   ```bash
-   # Install all dependencies including dev dependencies
-   # This will install the dependencies on your system which should be the dev container
-   # -e flag installs the package in editable mode which is useful for development
-   uv pip install -e .[dev] --system
-
-   # Install only production dependencies
-   uv pip install . --system --no-cache-dir
-   ```
-
-### Development with Docker
-
-You can also use Docker for local development (recommended):
-
-```bash
-# Build and run the development Docker container
-docker build -t textlayer-core -f Dockerfile .
-docker run -p 5000:5000 textlayer-core
-```
-
-## ⚙️ Configuration
-
-The application is configured through environment variables. Key configuration variables include:
-
-| Category | Environment Variables | Description |
-|----------|----------------------|-------------|
-| **Flask** | `FLASK_CONFIG` | Environment configuration (DEV, TEST, STAGING, PROD) |
-| **AWS** | `ACCESS_KEY_ID`, `SECRET_ACCESS_KEY`, `REGION` | AWS credentials and region |
-| **Elasticsearch** | `ELASTICSEARCH_URL`, `ELASTICSEARCH_USER`, `ELASTICSEARCH_PASSWORD` | Elasticsearch connection details |
-| **Langfuse** | `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_HOST` | Langfuse API configuration |
-| **LLM** | `LLM_API_KEY` | Generic API key for LLM providers |
-
-For secrets management, Doppler is recommended:
-
-1. Make a [Doppler](https://doppler.com) account
-2. Download the [Doppler CLI](https://docs.doppler.com/docs/install-cli)
-3. Run `doppler login`
-4. Run `doppler setup` and select your environment
-5. Start the application with automated secrets injection: `doppler run -- flask run`
-
-## 📝 Usage
-
-### Running Locally
-
-```bash
-# With regular environment variables
-flask run
-
-# Or with Doppler (recommended)
-doppler run -- flask run
-```
-
-### CLI Commands
-
-The application provides CLI commands for maintenance and testing:
-
-```bash
-# Run tests
-flask test
-
-# Run tests with coverage
-flask test --coverage
-```
-
-## 🚢 Deployment
-
-This template supports deployment as a containerized application.
-
-### Building the Docker Image
-
-```bash
-docker build -t textlayer-app -f Dockerfile .
-```
-
-### Deploying to AWS
-
-For AWS deployment, the template includes support for:
-- Amazon ECR for container registry
-- AWS Lambda for serverless deployment
-- Amazon ECS for container orchestration
-
-Specific deployment instructions depend on your chosen AWS service.
+1. Extend the application with new features
+2. Modify existing components
+3. Debug issues in the codebase
+4. Optimize performance
+5. Implement best practices for security and scalability
 
 ## 📁 Project Structure
 
 ```
-textlayer-core/
-├── app/                        # Main application code
-│   ├── commands/               # Command handlers for business logic
-│   ├── controllers/            # Request controllers
-│   ├── core/                   # Core application functionality
-│   ├── errors/                 # Error handling
-│   ├── middlewares/            # HTTP middleware
-│   ├── routes/                 # API route definitions
-│   ├── schemas/                # Data validation schemas
-│   ├── services/               # External service integrations
-│   │   ├── aws/                # AWS integration
-│   │   ├── email/              # Email service
-│   │   ├── llm/                # LiteLLM integration
-│   │   └── search/             # Search service integration
-│   ├── utils/                  # Utility functions
-│   ├── aws_triggers/           # AWS Lambda triggers
-│   ├── cli/                    # Command-line interface tools
-│   ├── decorators.py           # Decorators
-│   ├── extensions.py           # Flask extensions
-│   ├── log.py                  # Logging configuration
-│   └── __init__.py             # Application initialization
-├── application.py              # Application entry point
-├── config.py                   # Configuration management
-├── Dockerfile                  # Docker configuration
-├── requirements.txt            # Python dependencies
-├── .gitignore                  # Git ignore file
-└── README.md                   # This documentation
+textlayer-interview/
+├── app/                # Application package
+│   ├── __init__.py     # App initialization
+│   ├── commands/       # Command handlers
+│   ├── controllers/    # API controllers
+│   ├── models/         # Data models
+│   └── services/       # External services integration
+├── application.py      # Application entry point
+├── config.py           # Configuration settings
+├── requirements.txt    # Dependencies
+├── Dockerfile          # Container definition
+├── Makefile            # Build automation
+└── .env.example        # Environment variable template
 ```
 
-## 👥 Contributing
+## 📝 Notes for Candidates
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request 
+- Focus on demonstrating clean, maintainable code
+- Show your understanding of Python best practices
+- Consider edge cases and error handling
+- Document your code appropriately
+- Be prepared to explain your design decisions 

@@ -1,17 +1,21 @@
-FROM --platform=linux/arm64/v8 public.ecr.aws/lambda/python:3.9
+FROM python:3.9-slim
 
-ARG FUNCTION_DIR="/var/task/"
+WORKDIR /app
 
-COPY . ${FUNCTION_DIR}
-WORKDIR ${FUNCTION_DIR}
+COPY requirements.txt .
 
 # Install dependencies
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN ZAPPA_HANDLER_PATH=$( \
-    python -c "from zappa import handler; print (handler.__file__)" \
-    ) \
-    && echo $ZAPPA_HANDLER_PATH \
-    && cp $ZAPPA_HANDLER_PATH ${FUNCTION_DIR}
+# Copy application code
+COPY . .
 
-CMD ["handler.lambda_handler"]
+# Expose port
+EXPOSE 5000
+
+# Set environment variables
+ENV FLASK_APP=application.py
+ENV FLASK_CONFIG=DEV
+
+# Run the application
+CMD ["python", "-m", "flask", "run", "--host=0.0.0.0"]
