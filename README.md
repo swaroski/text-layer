@@ -21,7 +21,7 @@ The project includes a Makefile with helpful commands for setup and running:
 make init
 
 # Start the Flask server
-make start
+make run
 
 # For help with available commands
 make help
@@ -261,3 +261,4 @@ When working on the project, consider these key extension points:
 - Consider edge cases and error handling
 - Document your code appropriately
 - Be prepared to explain your design decisions 
+
