@@ -60,6 +60,12 @@ docker build -t textlayer-interview .
 
 # Run the container
 docker run -p 5000:5000 textlayer-interview
+
+# If you need to mount a local directory and pass environment variables
+docker run -p 5000:5000 \
+  -v $(pwd):/app \
+  --env-file .env \
+  textlayer-interview
 ```
 
 ## ⚙️ Configuration
@@ -68,7 +74,7 @@ The application is configured through environment variables in the `.env` file. 
 
 ```
 # Flask Configuration
-FLASK_CONFIG=DEV
+FLASK_CONFIG=DEV  # Options: DEV, TEST, STAGING, PROD
 
 # OpenAI Configuration
 OPENAI_API_KEY=sk-your-api-key-here
@@ -83,6 +89,15 @@ LANGFUSE_HOST=https://cloud.langfuse.com
 ```
 
 Make sure to update these values with your actual API keys before running the application.
+
+### Configuration Environment Options
+
+The application supports different environments controlled by the `FLASK_CONFIG` variable:
+
+- **DEV**: Development environment with debug mode enabled
+- **TEST**: Testing environment with testing flags enabled
+- **STAGING**: Staging environment with production-like settings for QA
+- **PROD**: Production environment with optimized settings
 
 ## 🔍 Overview
 
@@ -187,9 +202,20 @@ textlayer-interview/
 ├── app/                # Application package
 │   ├── __init__.py     # App initialization
 │   ├── commands/       # Command handlers
-│   ├── controllers/    # API controllers
+│   ├── controllers/    # API controllers 
+│   ├── core/           # Core functionality
+│   ├── errors/         # Error handling
+│   ├── middlewares/    # HTTP middlewares
 │   ├── models/         # Data models
-│   └── services/       # External services integration
+│   ├── routes/         # API routes
+│   ├── schemas/        # Data validation
+│   ├── services/       # External services integration
+│   ├── utils/          # Utility functions
+│   ├── aws_triggers/   # AWS triggers (legacy)
+│   ├── cli/            # CLI commands
+│   ├── decorators.py   # Decorators
+│   ├── extensions.py   # Flask extensions
+│   └── log.py          # Logging configuration
 ├── application.py      # Application entry point
 ├── config.py           # Configuration settings
 ├── requirements.txt    # Dependencies
@@ -197,6 +223,36 @@ textlayer-interview/
 ├── Makefile            # Build automation
 └── .env.example        # Environment variable template
 ```
+
+## 🛠️ Development Guide
+
+### Running Tests
+
+The application includes a test framework. To run tests:
+
+```bash
+# Run tests from the CLI
+flask test
+
+# Run tests with code coverage report
+flask test --coverage
+```
+
+### Project Extension Points
+
+When working on the project, consider these key extension points:
+
+1. **Adding a new API endpoint**:
+   - Create a route in `app/routes/`
+   - Implement a controller in `app/controllers/`
+   - Add request/response schemas in `app/schemas/`
+
+2. **Implementing business logic**:
+   - Add command handlers in `app/commands/`
+   - Ensure proper error handling
+
+3. **Integrating external services**:
+   - Add service connectors in `app/services/`
 
 ## 📝 Notes for Candidates
 
