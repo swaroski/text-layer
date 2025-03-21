@@ -2,6 +2,8 @@ from flask import current_app
 from functools import wraps
 from langfuse import Langfuse
 
+from app.utils import logger
+
 
 def prompt(name=None):
     """
@@ -32,8 +34,11 @@ def prompt(name=None):
                 current_app.config['LANGFUSE_SECRET_KEY'],
                 current_app.config['LANGFUSE_HOST']
             ]):
-                langfuse_prompt = Langfuse().get_prompt(prompt_name, type="chat")
-                return langfuse_prompt.compile(**kwargs, fallback=func(*args, **kwargs))
+                try:
+                    langfuse_prompt = Langfuse().get_prompt(prompt_name, type="chat")
+                    return langfuse_prompt.compile(**kwargs, fallback=func(*args, **kwargs))
+                except Exception as e:
+                    return func(*args, **kwargs)
             return func(*args, **kwargs)
         return wrapper
     return decorator

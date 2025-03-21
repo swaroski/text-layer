@@ -5,17 +5,11 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config:
-    # AWS
-    ACCESS_KEY_ID = os.environ.get('ACCESS_KEY_ID')
-    SECRET_ACCESS_KEY = os.environ.get('SECRET_ACCESS_KEY')
-    REGION = os.environ.get('REGION')
-
-    # Elasticsearch
-    ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')
-    ELASTICSEARCH_USER = os.environ.get('ELASTICSEARCH_USER')
-    ELASTICSEARCH_PASSWORD = os.environ.get('ELASTICSEARCH_PASSWORD')
-
-    # Elasticsearch Indices
+    # LLM
+    KNN_EMBEDDING_DIMENSION = int(os.environ.get('KNN_EMBEDDING_DIMENSION', 1536))
+    OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+    CHAT_MODEL = os.environ.get("CHAT_MODEL", "gpt-4o-mini")
+    EMBEDDING_MODEL = os.environ.get("EMBEDDING_MODEL", "text-embedding-3-small")
 
     # Langfuse
     LANGFUSE_PUBLIC_KEY = os.environ.get('LANGFUSE_PUBLIC_KEY')
@@ -28,9 +22,6 @@ class Config:
     else:
         litellm.success_callback = ["default"]
         litellm.failure_callback = ["default"]
-
-    # LLM
-    KNN_EMBEDDING_DIMENSION = int(os.environ.get('KNN_EMBEDDING_DIMENSION', 1536))
 
     # Environment
     ENV_VARS = []  # List of environment variables to pass to the container/batch
