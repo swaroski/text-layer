@@ -86,19 +86,19 @@ class ProcessChatMessageCommand(ReadCommand):
                 for tool_call in tool_calls
             ]
 
-            response_message = self.generate_message(**response_message_config)
+            response_message = self.format_message(**response_message_config)
 
             for tool_call in tool_calls:
                 tool_run = self.execute_tool_call(tool_call)
                 tool_messages.append(
-                    self.generate_message(
+                    self.format_message(
                         role="tool",
                         tool_call_id=tool_call.id,
                         content=json.dumps(tool_run),
                     )
                 )
         else:
-            response_message = self.generate_message(**response_message_config)
+            response_message = self.format_message(**response_message_config)
 
         # Add the messages as the last elements of the list
         self.chat_messages.append(response_message)
@@ -120,7 +120,7 @@ class ProcessChatMessageCommand(ReadCommand):
         return trimmed_messages
 
     @observe()
-    def generate_message(self, role: str, content: str, **kwargs) -> dict:
+    def format_message(self, role: str, content: str, **kwargs) -> dict:
         return {
             "id": str(uuid4()),
             "role": role,
