@@ -29,13 +29,13 @@ jobs:
 
       - name: Create zip archive
         run: |
-          ZIP_FILE="${REPO_NAME}_main.zip"
+          ZIP_FILE="${REPO_NAME}-${VERSION}.zip"
           git archive --format=zip --output "$ZIP_FILE" HEAD
           echo "ZIP_FILE=$ZIP_FILE" >> $GITHUB_ENV
 
       - name: Upload to S3
         run: |
-          DEST="s3://${S3_BUCKET}/${REPO_NAME}/${ZIP_FILE}-${VERSION}"
+          DEST="s3://${S3_BUCKET}/${REPO_NAME}/${ZIP_FILE}"
           aws s3 cp "$ZIP_FILE" "$DEST" --only-show-errors
           echo "Uploaded to $DEST"
 
