@@ -1,25 +1,36 @@
 from app.services.llm.prompts import prompt
+from typing import Any
 
 
 @prompt()
-def chat_prompt(**kwargs) -> str:
+def chat_prompt(**kwargs: Any) -> list[dict[str, str]]:
     """
-    This prompt is used to chat with the LLM.
+    Generate a system prompt for LLM chat interactions.
 
-    You can use the kwargs to pass in data that will be used to generate the prompt.
+    Parameters:
+        kwargs (dict): Keyword arguments to dynamically populate prompt content.
+            Example: chat_prompt(name="Alex", tone="friendly")
+
+    Returns:
+        list of dict: A list of messages formatted for an LLM chat interface.
     
-    For example, if you want to pass in a list of messages, you can do the following:
-    ```python
-    chat_prompt(example_variable="test")
-    ```
+    Example:
+        >>> chat_prompt(name="Alex", tone="friendly")
+        [
+            {"role": "system", "content": "You are a helpful assistant named Alex. Respond in a friendly tone."}
+        ]
 
-    You can then use the example_variable in the prompt like this:
-    ```
-    return [
-        {"role": "system", "content": "Your name is %(name)s."} % kwargs
-    ]
-    ```
+    Notes:
+        You can customize the content by passing in variables, which are substituted
+        using Python string formatting (`%(key)s`).
     """
     return [
-        {"role": "system", "content": "You are a helpful assistant."},
+        {
+            "role": "system",
+            "content": (
+                "You are a helpful assistant"
+                f"{' named %(name)s' if 'name' in kwargs else ''}."
+                f"{' Respond in a %(tone)s tone.' if 'tone' in kwargs else ''}"
+            ) % kwargs
+        }
     ]
