@@ -2,6 +2,13 @@ from flask import make_response
 
 from app.utils.logger import get_request_id
 
+def _normalize_payload(data):
+    # If data is a Pydantic model, convert to dict
+    if hasattr(data, "dict"):
+        return data.dict()
+    if hasattr(data, "model_dump"):
+        return data.model_dump()
+    return data
 
 class Response:
     HTTP_SUCCESS = 200
@@ -15,7 +22,7 @@ class Response:
     HTTP_NOT_IMPLEMENTED = 501
 
     def __init__(self, data=None, status=None):
-        self.data = data
+        self.data = _normalize_payload(data)
         self.status = status
 
     def build(self):
@@ -25,14 +32,14 @@ class Response:
             'correlation_id': get_request_id()
         }
         resp = make_response(response)
-
         return resp
 
     @staticmethod
     def make(data, status, deprecation_warning=False, deprecation_date=None):
+        payload = _normalize_payload(data)
         response = {
             'status': status,
-            'payload': data,
+            'payload': payload,
             'correlation_id': get_request_id()
         }
         if deprecation_warning:

@@ -8,7 +8,7 @@ class Config:
     # LLM
     KNN_EMBEDDING_DIMENSION = int(os.environ.get('KNN_EMBEDDING_DIMENSION', 1536))
     OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-    CHAT_MODEL = os.environ.get("CHAT_MODEL", "gpt-4o-mini")
+    CHAT_MODEL = os.environ.get("CHAT_MODEL", "gpt-4o")
     EMBEDDING_MODEL = os.environ.get("EMBEDDING_MODEL", "text-embedding-3-small")
 
     # Langfuse

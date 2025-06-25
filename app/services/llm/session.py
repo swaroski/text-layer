@@ -91,7 +91,8 @@ class LLMSession:
         },
     ]
 
-    DEFAULT_CHAT_MODEL = "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
+    #DEFAULT_CHAT_MODEL = "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
+    DEFAULT_CHAT_MODEL= "gpt-4o"
     DEFAULT_EMBEDDING_MODEL = "amazon.titan-embed-text-v2:0"
 
     def __init__(

@@ -4,6 +4,7 @@ from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from app.middlewares.auth_middleware import get_current_user
 from app.middlewares.logger_middleware import log_request_info, log_response_info
 from app.routes.thread_routes import thread_routes
+from app.routes.text_to_sql_routes import text_to_sql_routes
 
 from app.utils.messages import Error
 from app.utils.response import Response
@@ -16,6 +17,7 @@ def stop(env, resp):
 
 blueprints = {
     '/threads': thread_routes,
+    '/text-to-sql': text_to_sql_routes,
 }
 
 

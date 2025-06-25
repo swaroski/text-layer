@@ -9,6 +9,7 @@ from app.extensions import cors, ma, mail
 from app.log import LOG_CONFIG
 from config import config
 
+# Configure logging
 logging.config.dictConfig(LOG_CONFIG)
 logger = logging.getLogger(__name__)
 
@@ -19,14 +20,11 @@ log_levels = {
     "ERROR": logging.ERROR,
     "CRITICAL": logging.CRITICAL,
 }
-
-logger.level = log_levels.get(os.environ.get("LOG_LEVEL", "INFO"))
-
+logger.setLevel(log_levels.get(os.environ.get("LOG_LEVEL", "INFO")))
 
 def silence_warnings(config_name):
     if config_name == "PROD" and not sys.warnoptions:
         warnings.simplefilter("ignore")
-
 
 def create_app(config_name):
     from app.routes import routes
