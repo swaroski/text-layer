@@ -1,7 +1,6 @@
-from pydantic import Field
-from vaul import StructuredOutput
+from pydantic import BaseModel, Field
 
-
-class SqlQuery(StructuredOutput):
-    """A SQL query for retrieving data from a given table."""
+class SqlQuery(BaseModel):
     query: str = Field(..., title="A generated SQL query for retrieving data from the table.")
+    result_markdown: str = Field("", title="The result of the SQL query as a markdown table.")
+    explanation: str = Field("", title="Plain English explanation of the result.")

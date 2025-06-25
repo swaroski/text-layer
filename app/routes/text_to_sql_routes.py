@@ -1,13 +1,12 @@
-from langfuse.decorators import observe
-from vaul import tool_call
+"""This is a new API route created for testing with Streamlit"""
 
-from flask import  current_app
+from flask import Blueprint, request, current_app
 from app.utils.response import Response
 import openai
-
-
+import pandas as pd
 import duckdb
 
+text_to_sql_routes = Blueprint('text_to_sql_routes', __name__)
 
 def get_db_schema(db_path):
     con = duckdb.connect(db_path)
@@ -99,6 +98,11 @@ def execute_sql(sql_query):
         con.close()
     return df
 
+# --- Helper: Convert DataFrame to Markdown ---
+def df_to_markdown(df):
+    return df.to_markdown(index=False)
+
+# --- Helper: Build LLM-as-a-Judge prompt ---
 def build_judge_prompt(question, sql_query, result_markdown):
     return (
         f"Result table:\n{result_markdown}\n\n"
@@ -120,22 +124,15 @@ def parse_judge_response(judge_output):
         improved_sql = None
         improved_summary = judge_output.strip()
     return improved_sql, improved_summary
-# --- Helper: Convert DataFrame to Markdown ---
-def df_to_markdown(df):
-    return df.to_markdown(index=False)
 
-
-
-"""
- This is actually a Text to SQL to Natural Language Tool
-"""
-@tool_call
-@observe
-def text_to_sql(question: str) -> str:
-    
+# --- Main Route ---
+@text_to_sql_routes.route('/', methods=['POST'])
+def text_to_sql_endpoint():
+    data = request.json
+    question = data.get("question")
     if not question:
         return Response({"error": "Missing 'question' in request"}, Response.HTTP_BAD_REQUEST).build()
-    
+
     # 1. RAG: Get schema context and samples
     schema_context = retrieve_schema_context(question, top_k=3)
     sample_rows = retrieve_sample_rows(schema_context)
@@ -147,7 +144,7 @@ def text_to_sql(question: str) -> str:
         sql_query, draft_summary = parse_sql_response(sql_response)
     except Exception as e:
         return Response({"error": f"LLM SQL generation failed: {str(e)}"}, Response.HTTP_ERROR).build()
-    
+
     # 3. SQL Execution
     try:
         result_df = execute_sql(sql_query)
@@ -163,7 +160,7 @@ def text_to_sql(question: str) -> str:
     except Exception as e:
         improved_sql, improved_summary = None, None
 
-    
+    # Optionally re-execute improved SQL if needed
     if improved_sql and improved_sql != sql_query:
         try:
             result_df = execute_sql(improved_sql)
@@ -171,6 +168,17 @@ def text_to_sql(question: str) -> str:
         except Exception:
             pass  # fallback to previous result
 
-    return improved_summary 
-    
+    # 5. Build API Response
+    return Response({
+        "question": question,
+        "sql_query": improved_sql or sql_query,
+        "result_markdown": result_markdown,
+        "summary": improved_summary or draft_summary,
+        "debug": {
+            "llm_prompt": llm_prompt,
+            "sql_response": sql_response,
+            "judge_prompt": judge_prompt,
+            "judge_response": judge_response if 'judge_response' in locals() else None,
+        }
+    }, Response.HTTP_SUCCESS).build()
 

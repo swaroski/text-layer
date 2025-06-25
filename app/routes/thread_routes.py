@@ -1,17 +1,68 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify, Response, stream_with_context
+import uuid
+import time
+import logging
+from app.commands.threads.process_chat_message import ProcessChatMessageCommand
 
-from app.controllers.thread_controller import ThreadController
-from app.decorators import handle_exceptions
-from app.schemas.thread_schemas import chat_messages_schema
-from app.utils.response import Response
+thread_routes = Blueprint('thread_routes', __name__)
 
-thread_routes = Blueprint("thread_routes", __name__)
-thread_controller = ThreadController()
+logger = logging.getLogger(__name__)
 
+def generate_correlation_id():
+    return str(uuid.uuid4())
 
-@thread_routes.post("/chat")
-@handle_exceptions
+@thread_routes.route('/chat', methods=['POST'])
 def chat():
-    validated_request_data = chat_messages_schema.load(request.get_json())
-    messages = thread_controller.process_chat_message(validated_request_data.get("messages"))
-    return Response.make(messages, Response.HTTP_SUCCESS)
+    data = request.json
+    messages = data.get('messages', [])
+    if not messages:
+        return jsonify({"error": "No messages provided"}), 400
+
+    logger.info("Received /chat request")
+    logger.debug(f"Messages: {messages}")
+
+    try:
+        cmd = ProcessChatMessageCommand(messages)
+        payload = cmd.execute()
+        logger.debug(f"LLM/Tool payload: {payload}")
+    except Exception as e:
+        logger.error(f"Error in ProcessChatMessageCommand: {e}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
+
+    response = {
+        "correlation_id": generate_correlation_id(),
+        "payload": payload,
+        "status": 200
+    }
+    return jsonify(response), 200
+
+@thread_routes.route('/chat/stream', methods=['POST'])
+def chat_stream():
+    data = request.json
+    messages = data.get('messages', [])
+    if not messages:
+        return jsonify({"error": "No messages provided"}), 400
+
+    logger.info("Received /chat/stream request")
+    logger.debug(f"Messages: {messages}")
+
+    try:
+        cmd = ProcessChatMessageCommand(messages)
+        print("CMD", cmd)
+        payload = cmd.execute()
+        logger.debug(f"LLM/Tool payload: {payload}")
+    except Exception as e:
+        logger.error(f"Error in ProcessChatMessageCommand: {e}", exc_info=True)
+        yield f"data: [ERROR] {str(e)}\n\n"
+        return
+
+    def event_stream():
+        # Stream only assistant/tool messages
+        for message in payload:
+            if message.get("role") in {"assistant", "tool"}:
+                # Stream each message as a "chunk"
+                yield f"data: {message['content']}\n\n"
+                time.sleep(0.1)
+        yield "data: [DONE]\n\n"
+
+    return Response(stream_with_context(event_stream()), mimetype='text/event-stream')
